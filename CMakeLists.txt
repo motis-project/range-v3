@@ -9,9 +9,9 @@ cmake_minimum_required(VERSION 3.6)
 get_directory_property(is_subproject PARENT_DIRECTORY)
 
 if(NOT is_subproject)
-    set(is_standalone YES)
+  set(is_standalone YES)
 else()
-    set(is_standalone NO)
+  set(is_standalone NO)
 endif()
 
 project(Range-v3 CXX)
@@ -26,25 +26,25 @@ include(ranges_flags)
 
 add_library(range-v3-meta INTERFACE)
 add_library(range-v3::meta ALIAS range-v3-meta)
-target_include_directories(range-v3-meta INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>)
+target_include_directories(range-v3-meta SYSTEM INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>)
 target_include_directories(range-v3-meta SYSTEM INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
-target_compile_options(range-v3-meta INTERFACE $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->
-                                               $<$<COMPILE_LANG_AND_ID:CUDA,MSVC>:-Xcompiler=/permissive->)
+target_compile_options(range-v3-meta SYSTEM INTERFACE $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->
+  $<$<COMPILE_LANG_AND_ID:CUDA,MSVC>:-Xcompiler=/permissive->)
 
 add_library(range-v3-concepts INTERFACE)
 add_library(range-v3::concepts ALIAS range-v3-concepts)
-target_include_directories(range-v3-concepts INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>)
+target_include_directories(range-v3-concepts SYSTEM INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>)
 target_include_directories(range-v3-concepts SYSTEM INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
-target_compile_options(range-v3-concepts INTERFACE $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->
-                                                   $<$<COMPILE_LANG_AND_ID:CUDA,MSVC>:-Xcompiler=/permissive->)
+target_compile_options(range-v3-concepts SYSTEM INTERFACE $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->
+  $<$<COMPILE_LANG_AND_ID:CUDA,MSVC>:-Xcompiler=/permissive->)
 target_link_libraries(range-v3-concepts INTERFACE range-v3::meta)
 
 add_library(range-v3 INTERFACE)
 add_library(range-v3::range-v3 ALIAS range-v3)
-target_include_directories(range-v3 INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>)
+target_include_directories(range-v3 SYSTEM INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>)
 target_include_directories(range-v3 SYSTEM INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
 target_compile_options(range-v3 INTERFACE $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->
-                                          $<$<COMPILE_LANG_AND_ID:CUDA,MSVC>:-Xcompiler=/permissive->)
+  $<$<COMPILE_LANG_AND_ID:CUDA,MSVC>:-Xcompiler=/permissive->)
 target_link_libraries(range-v3 INTERFACE range-v3::concepts range-v3::meta)
 
 function(rv3_add_test TESTNAME EXENAME FIRSTSOURCE)
@@ -74,7 +74,7 @@ endif()
 
 # Add header files as sources to fix MSVS 2017 not finding source during debugging
 file(GLOB_RECURSE RANGE_V3_PUBLIC_HEADERS_ABSOLUTE
-                  "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 add_custom_target(range.v3.headers SOURCES ${RANGE_V3_PUBLIC_HEADERS_ABSOLUTE})
 set_target_properties(range.v3.headers PROPERTIES FOLDER "header")
 
@@ -83,8 +83,8 @@ if(RANGE_V3_HEADER_CHECKS)
   include(TestHeaders)
 
   file(GLOB_RECURSE RANGE_V3_PUBLIC_HEADERS
-                    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/include"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
+    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
   # These headers are not meant to be included directly:
   list(REMOVE_ITEM RANGE_V3_PUBLIC_HEADERS std/detail/associated_types.hpp)
   list(REMOVE_ITEM RANGE_V3_PUBLIC_HEADERS range/v3/detail/epilogue.hpp)
@@ -92,8 +92,8 @@ if(RANGE_V3_HEADER_CHECKS)
   if(CMAKE_CXX_COMPILER_ID STREQUAL GNU)
     foreach(header ${RANGE_V3_PUBLIC_HEADERS})
       file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/${header}" is_deprecated
-           LIMIT_COUNT 1
-           REGEX ".*RANGES_DEPRECATED_HEADER.*")
+        LIMIT_COUNT 1
+        REGEX ".*RANGES_DEPRECATED_HEADER.*")
       if(is_deprecated)
         list(APPEND RANGE_V3_DEPRECATED_PUBLIC_HEADERS "${header}")
       endif()
@@ -101,8 +101,8 @@ if(RANGE_V3_HEADER_CHECKS)
   endif()
 
   if(NOT RANGE_V3_COROUTINE_FLAGS)
-      # Can't test this header if we can't even compile it
-      list(APPEND RANGE_V3_DEPRECATED_PUBLIC_HEADERS range/v3/experimental/utility/generator.hpp)
+    # Can't test this header if we can't even compile it
+    list(APPEND RANGE_V3_DEPRECATED_PUBLIC_HEADERS range/v3/experimental/utility/generator.hpp)
   endif()
 
   add_header_test(test.range.v3.headers
@@ -129,8 +129,8 @@ if(NOT RANGE_V3_NEW_VERSION_HPP STREQUAL RANGE_V3_OLD_VERSION_HPP)
     OUTPUT_VARIABLE RANGE_V3_GIT_STATUS
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
-  string(REPLACE "\n" ";"  RANGE_V3_GIT_STATUS ${RANGE_V3_GIT_STATUS})
-  if (NOT "x${RANGE_V3_GIT_STATUS}" STREQUAL "x M Version.cmake; M doc/release_notes.md")
+  string(REPLACE "\n" ";" RANGE_V3_GIT_STATUS ${RANGE_V3_GIT_STATUS})
+  if(NOT "x${RANGE_V3_GIT_STATUS}" STREQUAL "x M Version.cmake; M doc/release_notes.md")
     message(FATAL_ERROR "Cannot update version.hpp: range-v3 source directory has a dirty status")
   endif()
   file(
@@ -147,7 +147,7 @@ if(NOT RANGE_V3_NEW_VERSION_HPP STREQUAL RANGE_V3_OLD_VERSION_HPP)
     COMMAND ${GIT_EXECUTABLE} -C "${CMAKE_CURRENT_SOURCE_DIR}" tag -f -a "${RANGE_V3_VERSION}" -m "${RANGE_V3_VERSION}"
   )
   find_program(CONAN_EXECUTABLE NAMES conan conan.exe)
-  if (NOT "x${CONAN_EXECUTABLE}" STREQUAL "xCONAN_EXECUTABLE-NOTFOUND")
+  if(NOT "x${CONAN_EXECUTABLE}" STREQUAL "xCONAN_EXECUTABLE-NOTFOUND")
     message(STATUS "Exporting conanfile for new version")
     execute_process(
       COMMAND ${CONAN_EXECUTABLE} create . range-v3/${RANGE_V3_VERSION}@ericniebler/stable
@@ -162,7 +162,7 @@ if(NOT RANGE_V3_NEW_VERSION_HPP STREQUAL RANGE_V3_OLD_VERSION_HPP)
   message(STATUS "  conan upload --all range-v3/${RANGE_V3_VERSION}@ericniebler/stable -r=range-v3")
 endif()
 
-if (RANGE_V3_INSTALL)
+if(RANGE_V3_INSTALL)
   include(CMakePackageConfigHelpers)
 
   # write_basic_package_version_file(...) gained ARCH_INDEPENDENT in CMake 3.14.
